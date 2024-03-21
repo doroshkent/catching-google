@@ -2,5 +2,13 @@
   "name": "catching-google",
   "version": "0.1.0",
   "main": "index.js",
-  "author": "Anastasiya Darashkevich"
+  "author": "Anastasiya Darashkevich",
+  "dependencies": {
+    "jest": "^29.7.0"
+  },
+  "scripts": {
+    "test": "yarn jest --watchAll"
+  },
+  "license": "MIT",
+  "devDependencies": {}
 }
