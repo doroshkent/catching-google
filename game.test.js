@@ -51,7 +51,7 @@ describe('game tests', () => {
     for (let i = 0; i < 10; i++) {
       const game = new Game()
       game.settings = {
-        gridSize: { rows: 1, columns: 3 }
+        gridSize: { rows: 1, columns: 3 }, googleJumpInterval: 2000
       }
 
       await game.start()
@@ -59,7 +59,7 @@ describe('game tests', () => {
       // p1 g p2 / p1 p2 g / p2 p1 g / p2 g p1 / g p1 p2 / g p2 p1
       const deltaForPlayer1 = game.google.position.x - game.player1.position.x
 
-      // const prevGooglePosition = game.google.position.clone()
+      const prevGooglePosition = game.google.position.clone()
 
       if (Math.abs(deltaForPlayer1) === 2) {
         const deltaForPlayer2 = game.google.position.x - game.player2.position.x
@@ -76,7 +76,7 @@ describe('game tests', () => {
         expect(game.score[2].points).toBe(0)
       }
 
-      // expect(game.google.position.equal(prevGooglePosition)).toBeFalsy()
+      expect(game.google.position.equal(prevGooglePosition)).toBeFalsy()
     }
   })
 })

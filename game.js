@@ -1,13 +1,14 @@
 class Game {
   #settings = { gridSize: { rows: 3, columns: 3 }, googleJumpInterval: 2000 }
-  #status = 'pending'
+  #status = 'pending' // 'pending' | 'in-process' | 'stopped'
   #player1
   #player2
   #google
   #score = {
-    1: { points: 0 },
-    2: { points: 0 }
+    1: { points: 0 }, // 1 for player1
+    2: { points: 0 } // 2 for player2
   }
+  #movingGoogleIntervalId
 
   async start() {
     if (this.#status === 'pending') {
@@ -15,7 +16,15 @@ class Game {
     }
     this.#createUnits()
 
-    setInterval(() => {
+    this.#runMovingGoogleInterval()
+  }
+
+  async stop() {
+    clearInterval(this.#movingGoogleIntervalId)
+    this.#status = 'stopped';
+  }
+  #runMovingGoogleInterval() {
+    this.#movingGoogleIntervalId = setInterval(() => {
       this.#moveGoogle()
     }, this.#settings.googleJumpInterval)
   }
@@ -72,7 +81,9 @@ class Game {
   #checkGoogleCatching(player) {
     if (player.position.equal(this.#google.position)) {
       this.#score[player.playerNumber].points += 1
+      clearInterval(this.#movingGoogleIntervalId)
       this.#moveGoogle()
+      this.#runMovingGoogleInterval()
     }
   }
 
