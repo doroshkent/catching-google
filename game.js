@@ -1,6 +1,6 @@
 class Game {
-  #settings = { gridSize: { rows: 3, columns: 3 }, googleJumpInterval: 2000 }
-  #status = 'pending' // 'pending' | 'in-process' | 'finished' | 'paused'
+  #settings = { gridSize: { rows: 3, columns: 3 }, googleJumpInterval: 2000, pointsToWin: 10 }
+  #status = 'pending' // 'pending' | 'in-process' | 'finished' | 'paused' | 'stopped'
   #player1
   #player2
   #google
@@ -19,8 +19,14 @@ class Game {
     this.#runMovingGoogleInterval()
   }
 
-  async finish() {
+  async stop() {
     clearInterval(this.#movingGoogleIntervalId)
+    this.#status = 'stopped';
+  }
+
+  async #finishGame() {
+    clearInterval(this.#movingGoogleIntervalId)
+    this.#google = new Google(new Position({ x: 0, y: 0 }))
     this.#status = 'finished';
   }
 
@@ -79,12 +85,16 @@ class Game {
     return newPosition.equal(otherPlayer.position)
   }
 
-  #checkGoogleCatching(player) {
+  async #checkGoogleCatching(player) {
     if (player.position.equal(this.#google.position)) {
       this.#score[player.playerNumber].points += 1
-      clearInterval(this.#movingGoogleIntervalId)
-      this.#moveGoogle()
-      this.#runMovingGoogleInterval()
+      if (this.#score[player.playerNumber].points === this.#settings.pointsToWin) {
+        await this.#finishGame()
+      } else {
+        clearInterval(this.#movingGoogleIntervalId)
+        this.#moveGoogle()
+        this.#runMovingGoogleInterval()
+      }
     }
   }
 
@@ -95,6 +105,7 @@ class Game {
       this.#settings.gridSize.rows))
 
     this.#google = new Google(googlePosition)
+
   }
 
   #movePlayer(player, otherPlayer, delta) {
