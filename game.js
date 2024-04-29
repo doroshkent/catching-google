@@ -1,12 +1,12 @@
 class Game {
   #settings = { gridSize: { rows: 3, columns: 3 }, googleJumpInterval: 2000 }
-  #status = 'pending' // 'pending' | 'in-process' | 'stopped'
+  #status = 'pending' // 'pending' | 'in-process' | 'finished' | 'paused'
   #player1
   #player2
   #google
   #score = {
-    1: { points: 0 }, // 1 for player1
-    2: { points: 0 } // 2 for player2
+    1: { points: 0 },
+    2: { points: 0 }
   }
   #movingGoogleIntervalId
 
@@ -19,10 +19,11 @@ class Game {
     this.#runMovingGoogleInterval()
   }
 
-  async stop() {
+  async finish() {
     clearInterval(this.#movingGoogleIntervalId)
-    this.#status = 'stopped';
+    this.#status = 'finished';
   }
+
   #runMovingGoogleInterval() {
     this.#movingGoogleIntervalId = setInterval(() => {
       this.#moveGoogle()
@@ -204,9 +205,9 @@ class NumberUtil {
 }
 
 class Position {
-  constructor(obj) {
-    this.x = obj.x
-    this.y = obj.y
+  constructor(position) {
+    this.x = position.x
+    this.y = position.y
   }
 
   static getNotCrossedPosition(coordinates, maxX, maxY) {

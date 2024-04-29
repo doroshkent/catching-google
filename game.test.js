@@ -1,5 +1,4 @@
-const { Game } = require('./game')
-
+import { Game } from "./game";
 
 describe('game tests', () => {
   it('should set gridSize', () => {
@@ -18,24 +17,26 @@ describe('game tests', () => {
     expect(gridSize.columns).toBe(5)
   });
 
-  it('should start initial game.', () => {
+  it('should start initial game.', async () => {
     const game = new Game()
 
-    game.start()
+    expect(game.status).toBe('pending')
+
+    await game.start()
 
     expect(game.status).toBe('in-process')
   })
 
-  it('game units should have unique coordinates', () => {
+  it('game units should have unique coordinates', async () => {
     const game = new Game()
 
     game.settings = { gridSize: { rows: 1, columns: 3 } }
 
-    game.start()
+    await game.start()
 
     const units = [ game.player1, game.player2, game.google ]
-    const coordinates = units.map(unit => unit.position)
-    const uniqueCoordinates = [ ...new Set(coordinates) ]
+    const coordinates = units.map(u => u.position)
+    const uniqueCoordinates = Array.from(new Set(coordinates.map(obj => JSON.stringify(obj))), str => JSON.parse(str));
     expect(uniqueCoordinates.length).toBe(units.length)
   })
 
