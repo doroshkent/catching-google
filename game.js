@@ -1,5 +1,5 @@
-class Game {
-  #settings = { gridSize: { rows: 3, columns: 3 }, googleJumpInterval: 2000, pointsToWin: 10 }
+export class Game {
+  #settings = { gridSize: { rows: 3, columns: 3 }, googleJumpInterval: 2000, pointsToWin: 5 }
   #status = 'pending' // 'pending' | 'in-process' | 'finished' | 'paused' | 'stopped'
   #player1
   #player2
@@ -10,12 +10,16 @@ class Game {
   }
   #movingGoogleIntervalId
 
+  constructor(eventEmitter) {
+    this.eventEmitter = eventEmitter
+  }
+
   async start() {
     if (this.#status === 'pending') {
       this.#status = 'in-process'
     }
     this.#createUnits()
-
+    this.eventEmitter.emit('update')
     this.#runMovingGoogleInterval()
   }
 
@@ -89,6 +93,7 @@ class Game {
     if (player.position.equal(this.#google.position)) {
       this.#score[player.playerNumber].points += 1
       if (this.#score[player.playerNumber].points === this.#settings.pointsToWin) {
+        this.eventEmitter.emit('update')
         await this.#finishGame()
       } else {
         clearInterval(this.#movingGoogleIntervalId)
@@ -105,7 +110,7 @@ class Game {
       this.#settings.gridSize.rows))
 
     this.#google = new Google(googlePosition)
-
+    this.eventEmitter.emit('update')
   }
 
   #movePlayer(player, otherPlayer, delta) {
@@ -117,7 +122,8 @@ class Game {
 
     if (delta.x) player.position.x += delta.x
     if (delta.y) player.position.y += delta.y
-
+    
+    this.eventEmitter.emit('update')
     this.#checkGoogleCatching(player, delta)
   }
 
@@ -242,8 +248,4 @@ class Position {
   equal(otherPosition) {
     return this.x === otherPosition.x && this.y === otherPosition.y;
   }
-}
-
-module.exports = {
-  Game
 }
