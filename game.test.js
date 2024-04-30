@@ -1,10 +1,13 @@
 import { Game } from "./game";
+import { EventEmitter } from "./utils/eventEmitter";
 
 describe('game tests', () => {
   let game;
 
   beforeEach(() => {
-    game = new Game();
+    const eventEmitter = new EventEmitter()
+    game = new Game(eventEmitter)
+    game.eventEmitter.addEventListener('update', () =>{})
   })
 
   afterEach(async () => {
@@ -44,15 +47,18 @@ describe('game tests', () => {
   })
 
   it('should check google position after jump', async () => {
-    game.settings = { gridSize: { rows: 1, columns: 3 }, googleJumpInterval: 1000 }
+    game.settings = { gridSize: { rows: 1, columns: 4 }, googleJumpInterval: 1000 }
     await game.start()
     const prevPosition = game.google.position.clone()
-    delay(1500).then(() => expect(game.google.position.equal(prevPosition)).toBeFalsy())
+    await delay(1500)
+    expect(game.google.position.equal(prevPosition)).toBeFalsy()
   })
 
   it('should catch google by player1 or player2 for one row', async () => {
     for (let i = 0; i < 10; i++) {
-      const game = new Game();
+      const eventEmitter = new EventEmitter()
+      game = new Game(eventEmitter)
+      game.eventEmitter.addEventListener('update', () =>{})
       game.settings = {
         gridSize: { rows: 1, columns: 3 }, googleJumpInterval: 2000
       }
@@ -84,7 +90,9 @@ describe('game tests', () => {
 
   it('should catch google by player1 or player2 for one column', async () => {
     for (let i = 0; i < 10; i++) {
-      const game = new Game();
+      const eventEmitter = new EventEmitter()
+      game = new Game(eventEmitter)
+      game.eventEmitter.addEventListener('update', () =>{})
       game.settings = {
         gridSize: { rows: 3, columns: 1 }, googleJumpInterval: 2000
       }
@@ -133,7 +141,7 @@ describe('game tests', () => {
     } while (game.score[1].points !== game.settings.pointsToWin && game.score[2].points !== game.settings.pointsToWin)
 
     expect(game.status).toBe('finished')
-    expect(game.google.position).toEqual({x: 0, y: 0})
+    expect(game.google.position).toEqual({ x: 0, y: 0 })
   });
 })
 
