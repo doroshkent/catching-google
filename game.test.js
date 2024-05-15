@@ -7,84 +7,106 @@ describe('game tests', () => {
   beforeEach(() => {
     const eventEmitter = new EventEmitter()
     game = new Game(eventEmitter)
-    game.eventEmitter.addEventListener('update', () =>{})
+    game.eventEmitter.addEventListener('update', () => {
+    })
   })
 
   afterEach(async () => {
     await game.stop()
   })
-  it('should set gridSize', () => {
-    game.settings = ({
+  it('should set gridSize', async () => {
+    game.setSettings({
       gridSize: {
         rows: 4,
         columns: 5
       }
     })
 
-    const gridSize = game.settings.gridSize
+    const settings = await game.getSettings()
+    const gridSize = settings.gridSize
 
     expect(gridSize.rows).toBe(4)
     expect(gridSize.columns).toBe(5)
   });
 
   it('should start initial game.', async () => {
-    expect(game.status).toBe('pending')
+    let status = await game.getStatus()
+
+    expect(status).toBe('pending')
 
     await game.start()
 
-    expect(game.status).toBe('in-process')
+    status = await game.getStatus()
+
+    expect(status).toBe('in-process')
   })
 
   it('game units should have unique coordinates', async () => {
-    game.settings = { gridSize: { rows: 1, columns: 3 } }
+    game.setSettings({ gridSize: { rows: 1, columns: 3 } })
 
     await game.start()
 
-    const units = [ game.player1, game.player2, game.google ]
+    const player1 = await game.getPlayer1()
+    const player2 = await game.getPlayer2()
+    const google = await game.getGoogle()
+
+    const units = [ player1, player2, google ]
     const coordinates = units.map(u => u.position)
     const uniqueCoordinates = Array.from(new Set(coordinates.map(obj => JSON.stringify(obj))), str => JSON.parse(str));
     expect(uniqueCoordinates.length).toBe(units.length)
   })
 
   it('should check google position after jump', async () => {
-    game.settings = { gridSize: { rows: 1, columns: 4 }, googleJumpInterval: 1000 }
+    game.setSettings({ gridSize: { rows: 1, columns: 4 }, googleJumpInterval: 1000 })
     await game.start()
-    const prevPosition = game.google.position.clone()
+    let google = await game.getGoogle()
+    const prevPosition = google.position.clone()
     await delay(1500)
-    expect(game.google.position.equal(prevPosition)).toBeFalsy()
+    google = await game.getGoogle()
+    expect(google.position.equal(prevPosition)).toBeFalsy()
   })
 
   it('should catch google by player1 or player2 for one row', async () => {
     for (let i = 0; i < 10; i++) {
       const eventEmitter = new EventEmitter()
       game = new Game(eventEmitter)
-      game.eventEmitter.addEventListener('update', () =>{})
-      game.settings = {
+      game.eventEmitter.addEventListener('update', () => {
+      })
+      await game.setSettings({
         gridSize: { rows: 1, columns: 3 }, googleJumpInterval: 2000
-      }
+      })
 
       await game.start()
+      let google = await game.getGoogle()
+      const player1 = await game.getPlayer1()
+      const player2 = await game.getPlayer2()
 
-      const deltaForPlayer1 = game.google.position.x - game.player1.position.x
+      const deltaForPlayer1 = google.position.x - player1.position.x
 
-      const prevGooglePosition = game.google.position.clone()
+      const prevGooglePosition = google.position.clone()
 
       if (Math.abs(deltaForPlayer1) === 2) {
-        const deltaForPlayer2 = game.google.position.x - game.player2.position.x
+        const deltaForPlayer2 = google.position.x - player2.position.x
         if (deltaForPlayer2 > 0) game.movePlayer2Right()
         else game.movePlayer2Left()
 
-        expect(game.score[1].points).toBe(0)
-        expect(game.score[2].points).toBe(1)
+        const score = await game.getScore()
+
+        expect(score[1].points).toBe(0)
+        expect(score[2].points).toBe(1)
       } else {
         if (deltaForPlayer1 > 0) game.movePlayer1Right()
         else game.movePlayer1Left()
 
-        expect(game.score[1].points).toBe(1)
-        expect(game.score[2].points).toBe(0)
+        const score = await game.getScore()
+
+        expect(score[1].points).toBe(1)
+        expect(score[2].points).toBe(0)
       }
 
-      expect(game.google.position.equal(prevGooglePosition)).toBeFalsy()
+      google = await game.getGoogle()
+
+      expect(google.position.equal(prevGooglePosition)).toBeFalsy()
     }
   })
 
@@ -92,56 +114,77 @@ describe('game tests', () => {
     for (let i = 0; i < 10; i++) {
       const eventEmitter = new EventEmitter()
       game = new Game(eventEmitter)
-      game.eventEmitter.addEventListener('update', () =>{})
-      game.settings = {
+      game.eventEmitter.addEventListener('update', () => {
+      })
+      await game.setSettings({
         gridSize: { rows: 3, columns: 1 }, googleJumpInterval: 2000
-      }
+      })
 
       await game.start()
 
-      const deltaForPlayer1 = game.google.position.y - game.player1.position.y
+      let google = await game.getGoogle()
+      const player1 = await game.getPlayer1()
+      const player2 = await game.getPlayer2()
 
-      const prevGooglePosition = game.google.position.clone()
+      const deltaForPlayer1 = google.position.y - player1.position.y
+
+      const prevGooglePosition = google.position.clone()
 
       if (Math.abs(deltaForPlayer1) === 2) {
-        const deltaForPlayer2 = game.google.position.y - game.player2.position.y
+        const deltaForPlayer2 = google.position.y - player2.position.y
         if (deltaForPlayer2 > 0) game.movePlayer2Down()
         else game.movePlayer2Up()
 
-        expect(game.score[1].points).toBe(0)
-        expect(game.score[2].points).toBe(1)
+        const score = await game.getScore()
+
+        expect(score[1].points).toBe(0)
+        expect(score[2].points).toBe(1)
       } else {
         if (deltaForPlayer1 > 0) game.movePlayer1Down()
         else game.movePlayer1Up()
 
-        expect(game.score[1].points).toBe(1)
-        expect(game.score[2].points).toBe(0)
+        const score = await game.getScore()
+
+        expect(score[1].points).toBe(1)
+        expect(score[2].points).toBe(0)
       }
 
-      expect(game.google.position.equal(prevGooglePosition)).toBeFalsy()
+      google = await game.getGoogle()
+
+      expect(google.position.equal(prevGooglePosition)).toBeFalsy()
     }
   })
 
   it('should finish the game when necessary points are scored', async () => {
-    game.settings = {
+    await game.setSettings({
       gridSize: { rows: 3, columns: 1 }, googleJumpInterval: 2000, pointsToWin: 5
-    }
+    })
     await game.start()
+    const settings = await game.getSettings()
+    const score = await game.getScore()
+
     do {
-      const deltaForPlayer1 = game.google.position.y - game.player1.position.y
+      const google = await game.getGoogle()
+      const player1 = await game.getPlayer1()
+      const player2 = await game.getPlayer2()
+
+      const deltaForPlayer1 = google.position.y - player1.position.y
 
       if (Math.abs(deltaForPlayer1) === 2) {
-        const deltaForPlayer2 = game.google.position.y - game.player2.position.y
+        const deltaForPlayer2 = google.position.y - player2.position.y
         if (deltaForPlayer2 > 0) game.movePlayer2Down()
         else game.movePlayer2Up()
       } else {
         if (deltaForPlayer1 > 0) game.movePlayer1Down()
         else game.movePlayer1Up()
       }
-    } while (game.score[1].points !== game.settings.pointsToWin && game.score[2].points !== game.settings.pointsToWin)
+    } while (score[1].points !== settings.pointsToWin && score[2].points !== settings.pointsToWin)
 
-    expect(game.status).toBe('finished')
-    expect(game.google.position).toEqual({ x: 0, y: 0 })
+    const google = await game.getGoogle()
+    const status = await game.getStatus()
+
+    expect(status).toBe('finished')
+    expect(google.position).toEqual({ x: 0, y: 0 })
   });
 })
 

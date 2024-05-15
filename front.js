@@ -1,4 +1,4 @@
-import { Game } from "./game.js";
+import { GameRemoteProxy as Game } from "./gameRemoteProxy.js";
 import { EventEmitter } from "./utils/eventEmitter.js";
 
 const start = async () => {

@@ -167,31 +167,31 @@ export class Game {
     this.#movePlayer(this.#player2, this.#player1, delta)
   }
 
-  get settings() {
+  async getSettings() {
     return this.#settings
   }
 
-  set settings(newSettings) {
+  async setSettings(newSettings) {
     this.#settings = newSettings
   }
 
-  get status() {
+  async getStatus() {
     return this.#status
   }
 
-  get player1() {
+  async getPlayer1() {
     return this.#player1
   }
 
-  get player2() {
+  async getPlayer2() {
     return this.#player2
   }
 
-  get google() {
+  async getGoogle() {
     return this.#google
   }
 
-  get score() {
+  async getScore() {
     return this.#score
   }
 }
