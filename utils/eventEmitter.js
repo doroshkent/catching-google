@@ -9,7 +9,7 @@ export class EventEmitter {
   }
 
   emit(eventName, data = null) {
-    this.#subscribers[eventName].forEach(sub => sub(data))
+    this.#subscribers[eventName]?.forEach(sub => sub(data))
   }
 
   removeEventListener(eventName, subscriber) {

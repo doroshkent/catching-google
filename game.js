@@ -122,9 +122,9 @@ export class Game {
 
     if (delta.x) player.position.x += delta.x
     if (delta.y) player.position.y += delta.y
-    
-    this.eventEmitter.emit('update')
+
     this.#checkGoogleCatching(player, delta)
+    this.eventEmitter.emit('update')
   }
 
   movePlayer1Right() {
